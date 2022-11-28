@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from torch_utils import StructDataset
@@ -7,22 +8,24 @@ from sklearn.metrics import classification_report
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
-
-class Kmeans(Model):
+class kMeans(Model):
     def __init__(self):
         self.dataset = None
-        self.kmeans=KMeans()
+        self.kmeans = KMeans()
         self.acc = float()
 
     def best_n(self):
         train_x, test_x = train_test_split(self.dataset.dataframe, test_size=0.2, shuffle=False)
         train_y = train_x.pop('Diabetes_binary')
         test_y = test_x.pop('Diabetes_binary')
-        sc_X = StandardScaler()
-        train_x = sc_X.fit_transform(train_x)
-        test_x = sc_X.transform(test_x)
-        sc_y = StandardScaler()
-        y_train = sc_y.fit_transform(train_y)
+
+        train_x = train_x.iloc[:,:]
+        train_x = train_x.values
+
+        #sc_X = StandardScaler()
+        #test_x = sc_X.transform(test_x)
+        #sc_y = StandardScaler()
+        #y_train = sc_y.fit_transform(train_y)
 
         wcss = []
         for i in range(1, 11):
@@ -40,8 +43,8 @@ class Kmeans(Model):
         sc_X = StandardScaler()
         train_x = sc_X.fit_transform(train_x)
         test_x = sc_X.transform(test_x)
-        sc_y = StandardScaler()
-        y_train = sc_y.fit_transform(train_y)
+        # sc_y = StandardScaler()
+        # y_train = sc_y.fit_transform(train_y)
 
         self.kmeans.fit(train_x, train_y)
         preds = self.kmeans.predict(test_x)

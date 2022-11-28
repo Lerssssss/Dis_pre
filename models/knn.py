@@ -3,7 +3,7 @@ from torch_utils import StructDataset
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
-
+import pandas as pd
 
 # TODO
 class KNN(Model):
@@ -51,10 +51,18 @@ class KNN(Model):
         self.dataset = dataset
 
     def get_prediction(self, data):
-        return
+        test = pd.DataFrame([data['data']])
+        ret = dict()
+        if self.knn.predict(test)[0] == 0:
+            ret['prediction'] = "false"
+        else:
+            ret['prediction'] = "true"
+        ret['precision'] = self.acc
+        return ret
 
     def save_model(self, path):
         pass
+
 
     def load_model(self, path):
         pass

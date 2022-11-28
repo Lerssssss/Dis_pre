@@ -34,6 +34,7 @@ class XGBoost(Model):
         preds = self.Xgb.predict(test_x)
         self.acc = self.Xgb.score(test_x, test_y)
         return classification_report(test_y, preds, output_dict=True)
+
     def load_data(self, dataset: StructDataset):
         self.dataset = dataset
 

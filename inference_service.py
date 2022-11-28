@@ -1,13 +1,12 @@
-
+from models.xgboost import XGBoost
+from models.random_forest import RandomForest
+from models.kMeans import kMeans
+from models.knn import KNN
 from models.model import Model
-from flask_restful import abort
 import config
 import torch_utils
 import os
 import difflib
-from models.random_forest import RandomForest
-from models.knn import KNN
-from models.xgboost import XGBoost
 
 
 class InferenceService:
@@ -15,32 +14,34 @@ class InferenceService:
 
     def __init__(self):
         self.__model = None
-        self.__result = None
-        self.__model_name = str()
+        self.__model_name= str()
+        self.__result = dict()
         self.__dataset_path = str()
 
     def __new__(cls, *args, **kwargs):
+        print('new inference service create')
         # 判断类属性是否已经被赋值
         if cls.INSTANCE is None:
             cls.INSTANCE = super().__new__(cls)
         # 返回类属性的单例引用
         return cls.INSTANCE
 
-
     def train_model(self, model_name, parameter: dict):
         """
         :return: 训练情况(string),训练结果(dict)
         """
-        self.__model_name = model_name
         if model_name == config.Models.XGBoost.value:
             self.__model = XGBoost()
+            self.__model_name = model_name
         if model_name == config.Models.RandomForest.value:
             self.__model = RandomForest()
+            self.__model_name = model_name
+        if model_name == config.Models.Kmeans.value:
+            self.__model = kMeans()
+            self.__model_name = model_name
         if model_name == config.Models.Knn.value:
             self.__model = KNN()
-        if model_name == config.Models.DeepFM.value:
-            # TODO
-            pass
+            self.__model_name = model_name
         # 获取数据集
         dataset = torch_utils.get_dataset_from_file(self.__dataset_path)
         # 训练模型
@@ -52,17 +53,17 @@ class InferenceService:
         self.__result = result
         return 'success', result
 
-
     def get_result(self):
         """
         :return: 训练结果(dict)
         """
         return self.__result
 
-
     def get_prediction(self, data):
         return self.__model.get_prediction(data)
 
+    def get_model_name(self):
+        return self.__model_name
 
     def solve_dataset(self, dataset_path: str):
         try:
@@ -70,10 +71,4 @@ class InferenceService:
             closest: list = difflib.get_close_matches(dataset_path, file_list, n=1)
             self.__dataset_path = closest[0]
         except IndexError as e:
-            abort(404, message='该数据集不存在')
-
-    def get_model_name(self):
-        return self.__model_name
-
-
-
+            raise FileNotFoundError
